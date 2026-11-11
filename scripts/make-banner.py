@@ -1,168 +1,239 @@
+#!/usr/bin/env python3
+"""
+Generate the stylized horizontal repository banner for SID Station.
+
+Specifications:
+- Output: docs/banner.png
+- Dimensions: exactly 1600 x 400 px (4:1 aspect ratio)
+- Background: deep near-black (#08070f) with subtle violet (#7c5cff) glow on left
+  and faint cyan (#22d3ee) glow on right
+- Waveform: clean horizontal oscilloscope sine wave line with violet-to-cyan gradient
+- Wordmark: "SID STATION" in bold geometric sans (Segoe UI Semibold: C:/Windows/Fonts/seguisb.ttf)
+- Subtitle: "Commodore 64 SID player - HVSC browser" in Segoe UI (C:/Windows/Fonts/segoeui.ttf)
+- Pill labels: "HVSC", "PSID / RSID", "6581 · 8580" in muted slate
+- Technique: 2x supersampling (3200x800) downsampled via Lanczos for crisp anti-aliasing
+"""
 
 import math
 import os
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+import sys
+from pathlib import Path
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 
-def create_banner():
-    width = 1600
-    height = 400
+def find_font(preferred_path: str, fallback_names: list[str]) -> str:
+    """Return an available font path, starting from preferred_path."""
+    if os.path.exists(preferred_path):
+        return preferred_path
+    windir = os.environ.get("WINDIR", "C:\\Windows")
+    fonts_dir = os.path.join(windir, "Fonts")
+    for name in fallback_names:
+        candidate = os.path.join(fonts_dir, name)
+        if os.path.exists(candidate):
+            return candidate
+    return preferred_path
 
-    # Base canvas with dark background (#08070f)
-    base = Image.new("RGBA", (width, height), (8, 7, 15, 255))
 
-    # Soft radial glow layer
-    glow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    glow_draw = ImageDraw.Draw(glow_layer)
+def create_banner(output_path: Path) -> Path:
+    # Target and 2x supersampled dimensions
+    target_w, target_h = 1600, 400
+    scale = 2
+    w, h = target_w * scale, target_h * scale
 
-    # Left violet glow (#5b3fd1)
-    glow_draw.ellipse(
-        (-180, -60, 480, 460),
-        fill=(91, 63, 209, 120),
+    # 1. Base canvas: deep near-black #08070f
+    base = Image.new("RGBA", (w, h), (8, 7, 15, 255))
+
+    # 2. Subtle ambient glows
+    # Left violet glow (#7c5cff = 124, 92, 255)
+    glow_l = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw_l = ImageDraw.Draw(glow_l)
+    draw_l.ellipse(
+        [
+            int(0.12 * w - 600),
+            int(0.48 * h - 360),
+            int(0.12 * w + 600),
+            int(0.48 * h + 360),
+        ],
+        fill=(124, 92, 255, 95),
     )
+    glow_l = glow_l.filter(ImageFilter.GaussianBlur(radius=180))
 
-    # Right cyan glow (#0e7490)
-    glow_draw.ellipse(
-        (1120, -60, 1780, 460),
-        fill=(14, 116, 144, 115),
+    # Right cyan glow (#22d3ee = 34, 211, 238)
+    glow_r = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    draw_r = ImageDraw.Draw(glow_r)
+    draw_r.ellipse(
+        [
+            int(0.88 * w - 600),
+            int(0.52 * h - 360),
+            int(0.88 * w + 600),
+            int(0.52 * h + 360),
+        ],
+        fill=(34, 211, 238, 85),
     )
+    glow_r = glow_r.filter(ImageFilter.GaussianBlur(radius=180))
 
-    # Heavily blur the edge glows
-    glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(radius=95))
-    base = Image.alpha_composite(base, glow_layer)
+    base.alpha_composite(glow_l)
+    base.alpha_composite(glow_r)
 
-    # Generate smooth sine-mixture waveform coordinates across full width
-    points = []
-    for x in range(width + 1):
-        # A musical harmonic mixture reminiscent of SID audio output
-        y = (
-            332.0
-            + 26.0 * math.sin(x * 0.013)
-            + 12.0 * math.sin(x * 0.031 + 1.2)
-            + 7.0 * math.cos(x * 0.007 + 2.5)
-            + 3.0 * math.sin(x * 0.065)
-        )
-        points.append((x, y))
+    # 3. Clean horizontal oscilloscope sine waveform line
+    k = 6.0  # 6 complete cycles across banner width
+    amp = 65.0  # Amplitude in 2x scale (32.5 px in 1x scale)
+    y_base = 0.77 * h  # Baseline in lower third
+    num_pts = 3201
+    pts = []
+    for i in range(num_pts):
+        x = (i / (num_pts - 1)) * w
+        y = y_base + math.sin(2 * math.pi * k * (x / w)) * amp
+        pts.append((x, y))
 
-    # Oscilloscope glow underneath
-    wave_glow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    wave_glow_draw = ImageDraw.Draw(wave_glow)
+    # Horizontal gradient (#7c5cff to #22d3ee)
+    grad_1d = Image.new("RGB", (w, 1))
+    grad_pixels = []
+    for i in range(w):
+        t = i / (w - 1)
+        r = int(124 * (1.0 - t) + 34 * t)
+        g = int(92 * (1.0 - t) + 211 * t)
+        b = int(255 * (1.0 - t) + 238 * t)
+        grad_pixels.append((r, g, b))
+    grad_1d.putdata(grad_pixels)
+    grad_2d = grad_1d.resize((w, h), Image.Resampling.NEAREST).convert("RGBA")
 
-    for i in range(len(points) - 1):
-        t = i / float(width)
-        # Gradient from #7c5cff (124, 92, 255) to #22d3ee (34, 211, 238)
-        r = int(124 + (34 - 124) * t)
-        g = int(92 + (211 - 92) * t)
-        b = int(255 + (238 - 255) * t)
-        wave_glow_draw.line(
-            [points[i], points[i + 1]],
-            fill=(r, g, b, 120),
-            width=9,
-        )
+    # Multi-pass phosphor luminescence
+    # Pass A: Broad bloom
+    mask_bloom = Image.new("L", (w, h), 0)
+    draw_bloom = ImageDraw.Draw(mask_bloom)
+    draw_bloom.line(pts, fill=60, width=28, joint="curve")
+    mask_bloom = mask_bloom.filter(ImageFilter.GaussianBlur(radius=14))
 
-    wave_glow = wave_glow.filter(ImageFilter.GaussianBlur(radius=7))
-    base = Image.alpha_composite(base, wave_glow)
+    # Pass B: Mid phosphor glow
+    mask_mid = Image.new("L", (w, h), 0)
+    draw_mid = ImageDraw.Draw(mask_mid)
+    draw_mid.line(pts, fill=135, width=12, joint="curve")
+    mask_mid = mask_mid.filter(ImageFilter.GaussianBlur(radius=4))
 
-    # Main 3 px wide gradient waveform line
-    wave_main = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    wave_main_draw = ImageDraw.Draw(wave_main)
+    # Pass C: Crisp core beam
+    mask_core = Image.new("L", (w, h), 0)
+    draw_core = ImageDraw.Draw(mask_core)
+    draw_core.line(pts, fill=255, width=5, joint="curve")
 
-    for i in range(len(points) - 1):
-        t = i / float(width)
-        r = int(124 + (34 - 124) * t)
-        g = int(92 + (211 - 92) * t)
-        b = int(255 + (238 - 255) * t)
-        wave_main_draw.line(
-            [points[i], points[i + 1]],
-            fill=(r, g, b, 235),
-            width=3,
-        )
+    # Composite alpha mask
+    combined_mask = ImageChops.add(mask_bloom, mask_mid)
+    combined_mask = ImageChops.add(combined_mask, mask_core)
 
-    base = Image.alpha_composite(base, wave_main)
+    line_layer = grad_2d.copy()
+    line_layer.putalpha(combined_mask)
+    base.alpha_composite(line_layer)
 
-    # Typography & UI overlay
-    ui_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(ui_layer)
+    # Hot white center highlight
+    mask_hot = Image.new("L", (w, h), 0)
+    draw_hot = ImageDraw.Draw(mask_hot)
+    draw_hot.line(pts, fill=210, width=2, joint="curve")
+    white_core = Image.new("RGBA", (w, h), (255, 255, 255, 255))
+    white_core.putalpha(mask_hot)
+    base.alpha_composite(white_core)
 
-    def load_font(path, size):
-        if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size)
-            except Exception:
-                pass
-        return ImageFont.load_default()
+    # 4. Typography
+    font_title_path = find_font("C:/Windows/Fonts/seguisb.ttf", ["seguisb.ttf", "segoeuib.ttf", "segoeui.ttf"])
+    font_sub_path = find_font("C:/Windows/Fonts/segoeui.ttf", ["segoeui.ttf", "seguisb.ttf"])
 
-    font_title = load_font("C:/Windows/Fonts/seguisb.ttf", 64)
-    font_sub = load_font("C:/Windows/Fonts/segoeui.ttf", 20)
-    font_pill = load_font("C:/Windows/Fonts/segoeui.ttf", 14)
+    font_title = ImageFont.truetype(font_title_path, 110)
+    font_sub = ImageFont.truetype(font_sub_path, 42)
+    font_pill = ImageFont.truetype(font_title_path, 24)
 
-    def get_char_width(char, font):
-        if hasattr(font, "getlength"):
-            return font.getlength(char)
-        bbox = font.getbbox(char)
-        return bbox[2] - bbox[0] if bbox else 30
+    draw = ImageDraw.Draw(base)
 
-    # Draw letter-spaced title "SID STATION"
+    # Wordmark: "SID STATION" with geometric tracking
     title_text = "SID STATION"
-    title_x = 110
-    title_y = 112
-    letter_spacing = 7
+    tracking = 20
+    char_widths = [
+        draw.textbbox((0, 0), ch, font=font_title)[2]
+        - draw.textbbox((0, 0), ch, font=font_title)[0]
+        for ch in title_text
+    ]
+    total_title_w = sum(char_widths) + tracking * (len(title_text) - 1)
+    cur_x = (w - total_title_w) / 2
+    title_y = 0.185 * h
 
-    curr_x = title_x
-    for char in title_text:
-        draw.text((curr_x, title_y), char, font=font_title, fill=(255, 255, 255, 255))
-        curr_x += get_char_width(char, font_title) + letter_spacing
+    for i, ch in enumerate(title_text):
+        bbox = draw.textbbox((0, 0), ch, font=font_title)
+        draw.text((cur_x, title_y - bbox[1]), ch, font=font_title, fill=(255, 255, 255, 255))
+        cur_x += char_widths[i] + tracking
 
-    # Subtitle
+    # Subtitle: "Commodore 64 SID player - HVSC browser"
     sub_text = "Commodore 64 SID player - HVSC browser"
-    sub_x = 112
-    sub_y = title_y + 80
-    draw.text((sub_x, sub_y), sub_text, font=font_sub, fill=(185, 182, 207, 255))
+    sub_bbox = draw.textbbox((0, 0), sub_text, font=font_sub)
+    sub_w = sub_bbox[2] - sub_bbox[0]
+    draw.text(
+        ((w - sub_w) / 2, 0.365 * h),
+        sub_text,
+        font=font_sub,
+        fill=(180, 190, 205, 240),
+    )
 
-    # Pill badges
-    pills = ["HVSC", "PSID / RSID"]
-    pill_x = 112
-    pill_y = sub_y + 44
-    pill_height = 26
-    pill_radius = 13
-    pill_gap = 12
-
-    for label in pills:
-        if hasattr(font_pill, "getlength"):
-            text_w = font_pill.getlength(label)
-        else:
-            bbox = font_pill.getbbox(label)
-            text_w = bbox[2] - bbox[0] if bbox else 50
-
-        pad_x = 14
-        pill_w = int(text_w + pad_x * 2)
-
-        # Pill background and 1px violet outline (#5b3fd1)
-        draw.rounded_rectangle(
-            [pill_x, pill_y, pill_x + pill_w, pill_y + pill_height],
-            radius=pill_radius,
-            fill=(20, 18, 31, 230),
-            outline=(91, 63, 209, 255),
-            width=1,
+    # 5. Pill labels in muted color
+    def draw_pill(draw_ctx, x0, y0, pw, ph, text, font):
+        r = ph // 2
+        draw_ctx.rounded_rectangle(
+            [x0, y0, x0 + pw, y0 + ph],
+            radius=r,
+            fill=(20, 18, 32, 210),
+            outline=(124, 92, 255, 120),
+            width=2,
         )
+        bb = font.getbbox(text)
+        tw = bb[2] - bb[0]
+        th = bb[3] - bb[1]
+        tx = x0 + (pw - tw) // 2 - bb[0]
+        ty = y0 + (ph - th) // 2 - bb[1]
+        draw_ctx.text((tx, ty), text, font=font, fill=(220, 216, 238, 235))
 
-        # Centered label text (#d8d4ea)
-        text_pos_x = pill_x + pad_x
-        text_pos_y = pill_y + 4
-        draw.text((text_pos_x, text_pos_y), label, font=font_pill, fill=(216, 212, 234, 255))
+    pills = ["HVSC", "PSID / RSID", "6581 · 8580"]
+    pad_x = 26
+    pad_y = 10
+    pill_dims = []
+    for p in pills:
+        bb = font_pill.getbbox(p)
+        pill_dims.append((bb[2] - bb[0] + pad_x * 2, bb[3] - bb[1] + pad_y * 2))
 
-        pill_x += pill_w + pill_gap
+    gap = 20
+    tot_p_w = sum(pw for pw, _ in pill_dims) + gap * (len(pills) - 1)
+    px = (w - tot_p_w) / 2
+    py = int(0.515 * h)
 
-    final_image = Image.alpha_composite(base, ui_layer).convert("RGB")
+    for i, p in enumerate(pills):
+        pw, ph = pill_dims[i]
+        draw_pill(draw, int(px), py, pw, ph, p, font_pill)
+        px += pw + gap
 
-    # Output directory & file saving
-    output_dir = "docs"
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "banner.png")
-    final_image.save(output_path, "PNG")
+    # 6. Downsample via Lanczos to exactly 1600 x 400
+    banner = base.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
-    print(f"Banner saved to {output_path} ({final_image.width}x{final_image.height})")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    banner.save(output_path, "PNG", optimize=True)
+
+    return output_path
+
+
+def main():
+    repo_root = Path(__file__).resolve().parent.parent
+    output_path = repo_root / "docs" / "banner.png"
+
+    if len(sys.argv) > 1:
+        output_path = Path(sys.argv[1]).resolve()
+
+    saved_path = create_banner(output_path)
+
+    # Verify output dimensions
+    with Image.open(saved_path) as img:
+        size = img.size
+        mode = img.mode
+
+    if size != (1600, 400):
+        raise ValueError(f"Unexpected image size: {size}, expected (1600, 400)")
+
+    print(f"Banner generated: {saved_path.resolve()}")
+    print(f"Image size: {size[0]}x{size[1]} ({mode})")
 
 
 if __name__ == "__main__":
-    create_banner()
+    main()
