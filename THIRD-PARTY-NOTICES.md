@@ -103,11 +103,47 @@ lightningcss (MPL-2.0), @vitejs/plugin-react (MIT), @tauri-apps/cli
 
 ## Content and data
 
-* **HVSC** — the High Voltage SID Collection is not included. Its files
-  (`*.sid`, `DOCUMENTS/STIL.txt`, `Songlengths.md5`, `Musicians.txt`, …) remain
-  © their authors and are governed by the HVSC licence/notice files shipped
-  with the collection.
-* **SID tunes** — © their composers and publishers.
+### HVSC — the High Voltage SID Collection
+
+HVSC is **not** included in this repository or in the installers. Every file
+of the collection (`*.sid`, `DOCUMENTS/STIL.txt`, `Songlengths.md5`,
+`Musicians.txt`, `HVSC.faq`, …) remains © its authors and is distributed under
+the terms that ship with the collection itself.
+
+The authoritative terms are the file `DOCUMENTS/Disclaimer.txt` inside every
+HVSC release. The parts that matter for an application like this one, quoted
+verbatim:
+
+> All of the tunes available in the High Voltage SID Collection (HVSC) are
+> copyrighted.
+>
+> Use of the SIDs in this collection for any purpose other than private
+> enjoyment is subject to relevant copyright law. […] any other use (including
+> YouTube use) requires additional permissions.
+>
+> Please note that the creators of this collection do not have (and neither do
+> they claim) the legal authority to grant licences or collect royalties or
+> other contributions to permit any use.
+
+In practice:
+
+* SID Station is a **player and indexer**. It reads a collection you already
+  own, does not redistribute tunes and does not grant any right over them.
+* The in-app updater only automates the official workflow: it queries the
+  official API, downloads from the official mirror, and runs the official HVSC
+  Update Tool on your own copy.
+* The name "HVSC" and "High Voltage SID Collection" are used descriptively, to
+  say what the application browses. SID Station is not affiliated with,
+  sponsored or endorsed by the HVSC team, and does not use its logo.
+* Commercial use of the tunes, remixes and inclusion in Creative Commons works
+  are outside the scope of this software and require permission from the
+  rights holders (see `DOCUMENTS/Disclaimer.txt` and
+  <https://hvsc.c64.org/>).
+
+### SID tunes
+
+© their composers and publishers. Attribution in the SID header or in STIL is
+not proof of current copyright ownership; the disclaimer above explains why.
 * **Commodore 64 ROMs** — KERNAL, BASIC and CHARGEN are © Commodore/Cloanto.
   SID Station never downloads or bundles them; the user supplies images they
   are entitled to use. The SHA-256 digests in `src-tauri/src/roms.rs` are

@@ -1,3 +1,5 @@
+![SID Station — Commodore 64 SID player and HVSC browser](docs/banner.png)
+
 # SID Station
 
 **A native Windows player and browser for the High Voltage SID Collection.**
@@ -199,14 +201,24 @@ Third-party components, their licences and the bundled 7-Zip licence are listed
 in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 **Content is separate from the software.** SID tunes, HVSC documents
-(STIL, Songlengths, Musicians.txt), the HVSC name and Commodore ROM images
-remain the property of their authors and are not covered by this repository's
-licence. None of them are distributed here.
+(STIL, Songlengths, Musicians.txt) and Commodore ROM images remain the property
+of their authors and are not covered by this repository's licence. None of them
+are distributed here.
+
+HVSC itself is not included: SID Station reads a collection you already have.
+The HVSC name is used descriptively (what the app browses); the project is not
+affiliated with or endorsed by the HVSC team. The collection's own
+`DOCUMENTS/Disclaimer.txt` governs the tunes: they are copyrighted, private
+enjoyment is the intended use, other uses need permission, and the HVSC crew
+cannot grant licences. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for
+the quoted terms.
 
 ## Credits
 
-- **HVSC** — the High Voltage SID Collection team and every composer who
-  contributed tunes, STIL notes and Songlengths.
+- **HVSC** — the High Voltage SID Collection team (Ian Coog, 448, Wilfred Bos,
+  Professor Chaos, Chris Abbott and the other members and contributors) and
+  every composer who contributed tunes, STIL notes and Songlengths. HVSC is the
+  reason this application exists; it is not affiliated with it.
 - **libsidplayfp / libresidfp** — the emulation core, by the libsidplayfp
   maintainers and the reSID/reSIDfp authors.
 - **libsidplayfp-wasm** — Chris Gleissner's WebAssembly build that makes
