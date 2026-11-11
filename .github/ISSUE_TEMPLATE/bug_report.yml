@@ -1,0 +1,76 @@
+name: Bug report
+description: Something in SID Station does not work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do **not** attach SID files, HVSC archives
+        or Commodore ROM images — a path inside HVSC is enough.
+  - type: input
+    id: version
+    attributes:
+      label: SID Station version
+      description: From the installer name or Settings
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: hvsc
+    attributes:
+      label: HVSC release
+      description: Value from DOCUMENTS/HVSC.txt
+      placeholder: "85"
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Audio engine
+      options:
+        - reSIDfp (accurate)
+        - SIDLite (fast)
+        - Not relevant
+    validations:
+      required: true
+  - type: dropdown
+    id: roms
+    attributes:
+      label: Are C64 system ROMs configured?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+        - Not relevant
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Search and type ...
+        2. Play ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Optional. Entries from data/errors.log, or a screenshot.
+      render: text
+    validations:
+      required: false

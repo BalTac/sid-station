@@ -1,0 +1,26 @@
+# Node / Vite
+node_modules/
+dist/
+*.local
+.env
+.env.*
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Runtime data (portable DB, backups, update staging, error log)
+data/
+tmp/
+*.db
+*.db-wal
+*.db-shm
+*.log
+
+# WASM engines are copied from node_modules at install time
+public/wasm/**/*.wasm
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini

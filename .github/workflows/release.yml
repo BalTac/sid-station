@@ -1,0 +1,59 @@
+name: Release build
+
+# Manual only: builds the Windows installers and prints their SHA-256 sums.
+# Nothing is uploaded to GitHub Releases automatically.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to embed in the artifact name (e.g. 0.1.0)"
+        required: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - run: npm run tauri build
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist-release | Out-Null
+          Copy-Item "src-tauri/target/release/bundle/nsis/*.exe" dist-release/
+          Copy-Item "src-tauri/target/release/bundle/msi/*.msi" dist-release/
+          Get-ChildItem dist-release | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            "$hash  $($_.Name)" | Tee-Object -FilePath dist-release/SHA256SUMS.txt -Append
+          }
+          Get-Content dist-release/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sid-station-${{ inputs.version }}-windows-x64
+          path: dist-release/*
+          if-no-files-found: error
+          retention-days: 30

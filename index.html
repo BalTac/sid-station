@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SID Station — Commodore 64 SID player and HVSC browser</title>
+    <meta name="description" content="Native Windows player and browser for the High Voltage SID Collection: full-text search, composer pages, playlists and accurate C64 SID playback." />
+    <script>
+      window.__errs = [];
+      const report = (msg) => {
+        window.__errs.push(String(msg));
+        document.title = "ERR: " + String(msg).slice(0, 160);
+        console.error(msg);
+      };
+      window.addEventListener("error", (e) => report(e.message + " @ " + (e.filename || "?") + ":" + e.lineno));
+      window.addEventListener("unhandledrejection", (e) => report("rejection: " + (e.reason && e.reason.message ? e.reason.message : e.reason)));
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

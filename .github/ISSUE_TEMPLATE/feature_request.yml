@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an improvement for SID Station
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please keep requests within the project scope: HVSC browsing and search,
+        playback, library management, the updater and Windows packaging.
+        Bundling SID tunes, HVSC documents or Commodore ROMs is out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the need, not only the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: SID Station version
+      placeholder: "0.1.0"
+    validations:
+      required: false

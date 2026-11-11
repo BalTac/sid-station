@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #07060e;
+  --color-panel: #0e0d18;
+  --color-panel2: #151223;
+  --color-line: #262239;
+  --color-muted: #928ea9;
+  --color-soft: #cfccdf;
+  --color-accent: #8b5cf6;
+  --color-accent2: #22d3ee;
+  --color-gold: #f5c451;
+  --font-sans: "Inter", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-soft);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 55%, transparent);
+  color: white;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #322c4d transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #322c4d;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #453d68;
+  background-clip: padding-box;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-line bg-panel;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-panel2 px-3 py-1 text-xs text-muted transition-colors;
+  }
+
+  .chip:hover {
+    @apply border-accent/50 text-soft;
+  }
+
+  .chip-active {
+    @apply border-accent/70 bg-accent/15 text-white;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-panel2 px-3.5 py-2 text-sm text-soft transition-colors;
+  }
+
+  .btn:hover {
+    @apply border-accent/60 bg-accent/10 text-white;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white transition-colors;
+  }
+
+  .btn-primary:hover {
+    @apply bg-accent/85;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-2.5 py-2 text-sm text-muted transition-colors;
+  }
+
+  .btn-ghost:hover {
+    @apply bg-white/5 text-white;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-line bg-panel2 px-3.5 py-2 text-sm text-soft placeholder:text-muted/70 focus:border-accent/70 focus:outline-none;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-[11px] font-medium tracking-wide text-muted uppercase;
+  }
+
+  .glow {
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-accent) 25%, transparent),
+      0 18px 60px -20px color-mix(in oklab, var(--color-accent) 55%, transparent);
+  }
+}
