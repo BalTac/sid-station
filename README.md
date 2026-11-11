@@ -232,6 +232,65 @@ the quoted terms.
 SID Station is an independent project, not affiliated with Commodore, Cloanto,
 the HVSC team or the libsidplayfp maintainers.
 
+## About this project
+
+**SID Station** was started in 2026 by **BalTac**
+([GitHub](https://github.com/BalTac)) and written with the help of
+**DeepSeek V4.1 Flash (1017)** — the affordable model, not the fancy one. That is
+part of the point: this is a tool built on a small budget, for the pleasure of
+listening to SID music, not a product.
+
+It began as a personal annoyance: every time I wanted to hear a tune I had to
+open a browser, reach a web player and search all over again. Excellent players
+and web services already exist — [DeepSID](https://deepsid.chordian.net/) in
+particular does a great job — but none of them keeps my whole HVSC on my own
+disk, opens in a second, and lets me shape it however I like. So this is not an
+attempt to reinvent the wheel: it is one specific wheel, built for one specific
+car.
+
+No accounts, no telemetry, no startup behind it.
+
+### Disclaimer
+
+SID Station is free software, distributed in the hope that it will be useful but
+**without any warranty**, as stated in the [GNU GPL v2](LICENSE) — see sections
+15 and 16 of the licence for the legal wording.
+
+The author is not affiliated with, endorsed by or sponsored by Commodore,
+Cloanto, the HVSC team, the libsidplayfp maintainers or any composer. Nothing in
+this repository is legal advice.
+
+SID tunes, HVSC documents and Commodore ROM images are **not** part of this
+project and remain the property of their respective rights holders. The HVSC
+collection in particular is governed by its own `DOCUMENTS/Disclaimer.txt`; the
+relevant points are quoted in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+If you use SID Station, you are responsible for holding a legitimate copy of the
+collection and of any ROM images.
+
+The software is provided as-is: the updater can modify your HVSC folder (it makes
+a full backup first), and audio output depends on your system, your WebView2
+runtime and your audio device.
+
+### Links
+
+- Repository: <https://github.com/BalTac/sid-station>
+- Licence: [LICENSE](LICENSE) — GPL-2.0-or-later
+- Third-party notices and content terms: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
+- Known limitations and roadmap: [TODO_LIST.md](TODO_LIST.md)
+- Release procedure: [RELEASING.md](RELEASING.md)
+
+### Thanks
+
+Thanks to everyone who tries the player, reports a bug or drops an idea in the
+issues — that is how this thing gets better, and it is the only QA department it
+has. Special thanks to the early testers who spent an evening listening to
+silent BASIC tunes so that the rest of us would not have to.
+
+If you find a tune that misbehaves, a composer page that looks wrong or a HVSC
+update that fails, open an issue with the tune path: it is the most useful gift
+you can give this project.
+
 ## Contributing
 
 Bug reports and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md)

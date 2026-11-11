@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `ABOUT` section in the README: author, AI assistance, motivation, disclaimer,
+  links and thanks to testers.
+- `TODO_LIST.md` with known gaps, hardening tasks and parked ideas.
+
 ## [0.1.0] - 2026-11-11
 
 First public release.
